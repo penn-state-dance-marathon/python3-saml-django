@@ -125,3 +125,9 @@ STATIC_URL = '/static/'
 AUTH_USER_MODEL = 'sample.TestUser'
 
 LOGIN_URL = '/saml/login'
+
+APPEND_SLASH = True
+
+AUTHENTICATION_BACKENDS = [
+    'django_saml.backends.SamlUserBackend'
+]

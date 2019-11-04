@@ -1,7 +1,10 @@
 from django.conf import settings
+from django.contrib import auth
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse, HttpResponseServerError, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
+from onelogin.saml2.utils import OneLogin_Saml2_Utils
 
 
 def prepare_django_request(request):
@@ -20,7 +23,8 @@ def login(request):
     req = prepare_django_request(request)
     auth = OneLogin_Saml2_Auth(req, old_settings=settings.ONELOGIN_SAML_SETTINGS)
     if 'next' in request.GET:
-        url = auth.login() + request.GET['next']
+        redirect_to = OneLogin_Saml2_Utils.get_self_url(req) + request.GET['next']
+        url = auth.login(redirect_to)
     else:
         url = auth.login()
     return HttpResponseRedirect(url)
@@ -29,29 +33,23 @@ def login(request):
 @csrf_exempt
 def saml_acs(request):
     req = prepare_django_request(request)
-    auth = OneLogin_Saml2_Auth(req, old_settings=settings.ONELOGIN_SAML_SETTINGS)
+    saml_auth = OneLogin_Saml2_Auth(req, old_settings=settings.ONELOGIN_SAML_SETTINGS)
     request_id = None
     if 'AuthNRequestID' in request.session:
         request_id = request.session['AuthNRequestID']
-    auth.process_response(request_id=request_id)
+    saml_auth.process_response(request_id=request_id)
 
-    errors = auth.get_errors()
+    errors = saml_auth.get_errors()
 
     if not errors:
-        print(auth.get_attributes())
-        print(auth.get_nameid_format())
-        print(auth.get_nameid())
-        return HttpResponse(auth.get_attributes(), "Response")
-        if 'AuthNRequestID' in request.session:
-            del request.session['AuthNRequestID']
-        request.session['samlUserdata'] = auth.get_attributes()
-        request.session['samlNameId'] = auth.get_nameid()
-        request.session['samlNameIdFormat'] = auth.get_nameid_format()
-        request.session['samlNameIdNameQualifier'] = auth.get_nameid_nq()
-        request.session['samlNameIdSPNameQualifier'] = auth.get_nameid_spnq()
-        request.session['samlSessionIndex'] = auth.get_session_index()
+        user = auth.authenticate(session_data=saml_auth.get_attributes())
+        if user is None:
+            raise PermissionDenied()
+        auth.login(request, user)
         if 'RelayState' in req['post_data'] and OneLogin_Saml2_Utils.get_self_url(req) != req['post_data']['RelayState']:
-            return HttpResponseRedirect(auth.redirect_to(req['post_data']['RelayState']))
+            return HttpResponseRedirect(saml_auth.redirect_to(req['post_data']['RelayState']))
+        else:
+            return HttpResponseRedirect(settings.SAML_DEFAULT_REDIRECT)
     return HttpResponseServerError(content=', '.join(errors))
 
 

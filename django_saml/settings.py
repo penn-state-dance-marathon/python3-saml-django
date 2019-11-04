@@ -46,3 +46,4 @@ SAML_SETTINGS = {
 
 IDP_METADATA_URL = 'http://192.168.99.100:8080/simplesaml/saml2/idp/metadata.php'
 IDP_METADATA_TIMEOUT = 3600
+SAML_DEFAULT_REDIRECT = '/'
