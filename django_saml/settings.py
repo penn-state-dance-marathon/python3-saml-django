@@ -1,3 +1,5 @@
+from django.contrib.auth import get_user_model
+
 SAML_SETTINGS = {
     "strict": False,
     "debug": True,
@@ -47,3 +49,4 @@ SAML_SETTINGS = {
 IDP_METADATA_URL = 'http://192.168.99.100:8080/simplesaml/saml2/idp/metadata.php'
 IDP_METADATA_TIMEOUT = 3600
 SAML_DEFAULT_REDIRECT = '/'
+SAML_USERNAME_ATTR = 'uid'
