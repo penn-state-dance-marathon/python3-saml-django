@@ -123,3 +123,5 @@ STATIC_URL = '/static/'
 
 
 AUTH_USER_MODEL = 'sample.TestUser'
+
+LOGIN_URL = '/saml/login'

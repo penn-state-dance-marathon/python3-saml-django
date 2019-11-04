@@ -2,9 +2,9 @@ SAML_SETTINGS = {
     "strict": False,
     "debug": True,
     "sp": {
-        "entityId": "https://192.168.99.100:8000/saml/metadata/",
+        "entityId": "http://127.0.0.1:8000/saml/metadata/",
         "assertionConsumerService": {
-            "url": "https://192.168.99.100:8000/saml/acs/",
+            "url": "http://192.168.99.100:8000/saml/acs/",
             "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
         },
         "NameIDFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
