@@ -128,6 +128,8 @@ LOGIN_URL = '/saml/login'
 
 APPEND_SLASH = True
 
+SAML_USERNAME_ATTR = 'email'
+
 AUTHENTICATION_BACKENDS = [
-    'django_saml.backends.SamlUserBackend'
+    'django_test.backends.CustomSamlBackend'
 ]
