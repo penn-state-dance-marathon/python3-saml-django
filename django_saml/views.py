@@ -21,40 +21,36 @@ def prepare_django_request(request):
 
 def login(request):
     req = prepare_django_request(request)
-    auth = OneLogin_Saml2_Auth(req, old_settings=settings.ONELOGIN_SAML_SETTINGS)
+    saml_auth = OneLogin_Saml2_Auth(req, old_settings=settings.ONELOGIN_SAML_SETTINGS)
     if 'next' in request.GET:
         redirect_to = OneLogin_Saml2_Utils.get_self_url(req) + request.GET['next']
-        url = auth.login(redirect_to)
     else:
-        url = auth.login()
+        redirect_to = OneLogin_Saml2_Utils.get_self_url(req) + settings.SAML_LOGIN_REDIRECT
+    url = saml_auth.login(redirect_to)
+    request.session['AuthNRequestID'] = saml_auth.get_last_request_id()
     return HttpResponseRedirect(url)
 
 
 def logout(request):
     req = prepare_django_request(request)
     saml_auth = OneLogin_Saml2_Auth(req, old_settings=settings.ONELOGIN_SAML_SETTINGS)
-    name_id = session_index = name_id_format = name_id_nq = name_id_spnq = None
-    if 'samlNameId' in request.session:
-        name_id = request.session['samlNameId']
-    if 'samlSessionIndex' in request.session:
-        session_index = request.session['samlSessionIndex']
-    if 'samlNameIdFormat' in request.session:
-        name_id_format = request.session['samlNameIdFormat']
-    if 'samlNameIdNameQualifier' in request.session:
-        name_id_nq = request.session['samlNameIdNameQualifier']
-    if 'samlNameIdSPNameQualifier' in request.session:
-        name_id_spnq = request.session['samlNameIdSPNameQualifier']
-
+    name_id = request.session.get('samlNameId', None)
+    session_index = request.session.get('samlSessionIndex', None)
+    name_id_format = request.session.get('samlNameIdFormat', None)
+    name_id_nq = request.session.get('samlNameIdNameQualifier', None)
+    name_id_spnq = request.session.get('samlNameIdSPNameQualifier', None)
     auth.logout(request)
-    return HttpResponseRedirect(saml_auth.logout(name_id=name_id, session_index=session_index, nq=name_id_nq, name_id_format=name_id_format, spnq=name_id_spnq))
+    url = saml_auth.logout(
+        name_id=name_id, session_index=session_index, nq=name_id_nq, name_id_format=name_id_format, spnq=name_id_spnq,
+        return_to=settings.SAML_LOGOUT_REDIRECT
+    )
+    return HttpResponseRedirect(url)
 
 
 def saml_sls(request):
     req = prepare_django_request(request)
     saml_auth = OneLogin_Saml2_Auth(req, old_settings=settings.ONELOGIN_SAML_SETTINGS)
-    request_id = None
-    if 'LogoutRequestID' in request.session:
-        request_id = request.session['LogoutRequestID']
+    request_id = request.session.get('LogoutRequestID', None)
     url = saml_auth.process_slo(request_id=request_id, delete_session_cb=lambda: request.session.flush())
     errors = saml_auth.get_errors()
     if len(errors) == 0:
@@ -62,16 +58,14 @@ def saml_sls(request):
         if url is not None:
             return HttpResponseRedirect(url)
         else:
-            return HttpResponse("Logged out successfully")
+            return HttpResponseRedirect(settings.SAML_LOGOUT_REDIRECT)
 
 
 @csrf_exempt
 def saml_acs(request):
     req = prepare_django_request(request)
     saml_auth = OneLogin_Saml2_Auth(req, old_settings=settings.ONELOGIN_SAML_SETTINGS)
-    request_id = None
-    if 'AuthNRequestID' in request.session:
-        request_id = request.session['AuthNRequestID']
+    request_id = request.session.get('AuthNRequestID', None)
     saml_auth.process_response(request_id=request_id)
 
     errors = saml_auth.get_errors()
@@ -88,9 +82,10 @@ def saml_acs(request):
         request.session['samlNameIdSPNameQualifier'] = saml_auth.get_nameid_spnq()
         request.session['samlSessionIndex'] = saml_auth.get_session_index()
         if 'RelayState' in req['post_data'] and OneLogin_Saml2_Utils.get_self_url(req) != req['post_data']['RelayState']:
-            return HttpResponseRedirect(saml_auth.redirect_to(req['post_data']['RelayState']))
+            url = saml_auth.redirect_to(req['post_data']['RelayState'])
+            return HttpResponseRedirect(url)
         else:
-            return HttpResponseRedirect(settings.SAML_DEFAULT_REDIRECT)
+            return HttpResponseRedirect(settings.SAML_LOGIN_REDIRECT)
     return HttpResponseServerError(content=', '.join(errors))
 
 
