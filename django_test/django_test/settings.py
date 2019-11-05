@@ -128,6 +128,34 @@ LOGIN_URL = '/saml/login'
 
 APPEND_SLASH = True
 
+SAML_SP = {
+    "entityId": "http://127.0.0.1:8000/saml/metadata/",
+    "assertionConsumerService": {
+        "url": "http://127.0.0.1:8000/saml/acs/",
+        "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+    },
+    "singleLogoutService": {
+        "url": "http://127.0.0.1:8000/saml/sls/",
+        "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+    },
+    "NameIDFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
+    "x509cert": "",
+    "privateKey": ""
+}
+
+SAML_IDP_URL = 'http://192.168.99.100:8080/simplesaml/saml2/idp/metadata.php'
+
+SAML_CONTACT = {
+    "technical": {
+        "givenName": "Technology Director",
+        "emailAddress": "technology@thon.org"
+    },
+    "support": {
+        "givenName": "Lead Systems Admin",
+        "emailAddress": "systems@thon.org"
+    }
+}
+
 SAML_USERNAME_ATTR = 'email'
 
 SAML_ATTR_MAP = [
