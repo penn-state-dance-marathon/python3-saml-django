@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.contrib import auth
 from django.core.exceptions import PermissionDenied
@@ -5,6 +7,9 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerEr
 from django.views.decorators.csrf import csrf_exempt
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from onelogin.saml2.utils import OneLogin_Saml2_Utils
+
+
+logger = logging.getLogger('django_saml')
 
 
 def prepare_django_request(request):
@@ -47,6 +52,7 @@ def logout(request):
         name_id=name_id, session_index=session_index, nq=name_id_nq, name_id_format=name_id_format, spnq=name_id_spnq,
         return_to=settings.SAML_LOGOUT_REDIRECT
     )
+    request.session['LogoutRequestID'] = saml_auth.get_last_request_id()
     return HttpResponseRedirect(url)
 
 
@@ -55,19 +61,35 @@ def saml_sls(request):
     req = prepare_django_request(request)
     saml_auth = OneLogin_Saml2_Auth(req, old_settings=settings.ONELOGIN_SAML_SETTINGS)
     request_id = request.session.get('LogoutRequestID', None)
-    url = saml_auth.process_slo(request_id=request_id, delete_session_cb=lambda: request.session.flush())
-    errors = saml_auth.get_errors()
-    if len(errors) == 0:
-        auth.logout(request)
-        if url is not None:
-            return HttpResponseRedirect(url)
+    try:
+        url = saml_auth.process_slo(request_id=request_id, delete_session_cb=lambda: request.session.flush())
+        errors = saml_auth.get_errors()
+        if len(errors) == 0:
+            auth.logout(request)
+            if url is not None:
+                return HttpResponseRedirect(url)
+            else:
+                return HttpResponseRedirect(settings.SAML_LOGOUT_REDIRECT)
         else:
-            return HttpResponseRedirect(settings.SAML_LOGOUT_REDIRECT)
+            if settings.DEBUG:
+                return HttpResponseServerError(', '.join(errors))
+            else:
+                logger.exception(', '.join(errors))
+                return HttpResponse("Invalid response", status=400)
+    except UnicodeDecodeError:
+        # Happens when someone messes with the response in the URL.  No need to log an exception.
+        return HttpResponse("Invalid request - Unable to decode response.", status=400)
+    except Exception as e:
+        if settings.DEBUG:
+            logger.exception(e)
+        return HttpResponse("Invalid request.", status=400)
 
 
 @csrf_exempt
 def saml_acs(request):
     """Handle an AuthenticationResponse from the IdP."""
+    if request.method != 'POST':
+        return HttpResponse('Method not allowed.', status=405)
     req = prepare_django_request(request)
     saml_auth = OneLogin_Saml2_Auth(req, old_settings=settings.ONELOGIN_SAML_SETTINGS)
     request_id = request.session.get('AuthNRequestID', None)
