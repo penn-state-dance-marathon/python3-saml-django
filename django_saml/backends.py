@@ -2,15 +2,16 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 
-
 UserModel = get_user_model()
 
 
 class SamlUserBackend(ModelBackend):
+    """Backend for logging in users through SAML responses."""
 
     create_unknown_user = True
 
     def authenticate(self, request, session_data=None, **kwargs):
+        """Handle logging in a user based on SAML data."""
         if session_data is None:
             return None
 
@@ -32,11 +33,9 @@ class SamlUserBackend(ModelBackend):
         return user if self.user_can_authenticate(user) else None
 
     def clean_username(self, username):
-        """
-        Perform any cleaning on the "username" prior to using it to get or
-        create the user object.  Return the cleaned username.
+        """Perform any cleaning on the "username" prior to using it to get or create the user object.
 
-        By default, return the username unchanged.
+        By default return unchanged.
         """
         return username
 

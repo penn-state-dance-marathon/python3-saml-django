@@ -5,9 +5,12 @@ from onelogin.saml2.settings import OneLogin_Saml2_Settings
 
 
 class DjangoSamlConfig(AppConfig):
+    """App configuration for django_saml."""
+
     name = 'django_saml'
 
     def ready(self):
+        """Pull settings from Django and defaults and configure SAML settings for use."""
         from . import settings as defaults
         from django.conf import settings
         from django.core.cache import cache
