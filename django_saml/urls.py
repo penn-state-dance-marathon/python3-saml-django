@@ -2,6 +2,8 @@ from django.urls import path
 
 from django_saml import views
 
+app_name = 'django_saml'
+
 urlpatterns = [
     path('metadata', views.metadata, name='metadata'),
     path('acs', views.saml_acs, name='acs'),
