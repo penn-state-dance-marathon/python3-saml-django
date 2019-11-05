@@ -41,10 +41,12 @@ class SamlUserBackend(ModelBackend):
         return username
 
     def configure_user(self, session_data, user):
-        """
-        Configure a user after creation and return the updated user.
+        """Configure a user after creation and return the updated user.
 
-        By default, return the user unmodified.
+        By default, apply SAML attribute mapping and set an unusable password for the user.
         """
+        for saml_attr, django_attr in settings.SAML_ATTR_MAP:
+            setattr(user, django_attr, session_data[saml_attr])
         user.set_unusable_password()
+        user.save()
         return user

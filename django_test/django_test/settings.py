@@ -130,6 +130,10 @@ APPEND_SLASH = True
 
 SAML_USERNAME_ATTR = 'email'
 
+SAML_ATTR_MAP = [
+    ('email', 'email')
+]
+
 AUTHENTICATION_BACKENDS = [
     'django_test.backends.CustomSamlBackend'
 ]
