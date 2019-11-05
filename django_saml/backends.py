@@ -46,7 +46,7 @@ class SamlUserBackend(ModelBackend):
         By default, apply SAML attribute mapping and set an unusable password for the user.
         """
         for saml_attr, django_attr in settings.SAML_ATTR_MAP:
-            setattr(user, django_attr, session_data[saml_attr])
+            setattr(user, django_attr, session_data[saml_attr][0])
         user.set_unusable_password()
         user.save()
         return user
