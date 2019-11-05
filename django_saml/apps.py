@@ -19,8 +19,8 @@ class DjangoSamlConfig(AppConfig):
                 setattr(settings, name, getattr(defaults, name))
 
         settings.SAML_SETTINGS = {
-            'strict': not settings.DEBUG,
-            'debug': settings.DEBUG
+            'strict': settings.SAML_STRICT,
+            'debug': settings.SAML_DEBUG
         }
 
         if settings.SAML_SP is None:

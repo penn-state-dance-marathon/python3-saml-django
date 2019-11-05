@@ -1,3 +1,6 @@
+SAML_STRICT = True
+SAML_DEBUG = False
+
 SAML_SP = None
 
 SAML_IDP = None
