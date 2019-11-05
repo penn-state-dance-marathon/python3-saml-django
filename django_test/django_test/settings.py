@@ -138,12 +138,27 @@ SAML_SP = {
         "url": "http://127.0.0.1:8000/saml/sls/",
         "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
     },
-    "NameIDFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
-    "x509cert": "",
-    "privateKey": ""
+    "NameIDFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"
 }
 
+SAML_BASE_DIRECTORY = BASE_DIR
+
 SAML_IDP_URL = 'http://192.168.99.100:8080/simplesaml/saml2/idp/metadata.php'
+
+SAML_SECURITY = {
+    "nameIdEncrypted": False,
+    "authnRequestsSigned": True,
+    "logoutRequestSigned": True,
+    "logoutResponseSigned": False,
+    "signMetadata": False,
+    "wantMessagesSigned": False,
+    "wantAssertionsSigned": False,
+    "wantNameId": True,
+    "wantNameIdEncrypted": False,
+    "wantAssertionsEncrypted": False,
+    "signatureAlgorithm": "http://www.w3.org/2000/09/xmldsig#rsa-sha1",
+    "digestAlgorithm": "http://www.w3.org/2000/09/xmldsig#sha1"
+}
 
 SAML_CONTACT = {
     "technical": {

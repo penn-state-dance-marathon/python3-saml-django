@@ -48,4 +48,4 @@ class DjangoSamlConfig(AppConfig):
         if settings.SAML_ORGANIZATION is not None:
             settings.SAML_SETTINGS['organization'] = settings.SAML_ORGANIZATION
 
-        settings.ONELOGIN_SAML_SETTINGS = OneLogin_Saml2_Settings(settings.SAML_SETTINGS)
+        settings.ONELOGIN_SAML_SETTINGS = OneLogin_Saml2_Settings(settings.SAML_SETTINGS, settings.SAML_BASE_DIRECTORY)
