@@ -30,6 +30,41 @@ def login(request):
     return HttpResponseRedirect(url)
 
 
+def logout(request):
+    req = prepare_django_request(request)
+    saml_auth = OneLogin_Saml2_Auth(req, old_settings=settings.ONELOGIN_SAML_SETTINGS)
+    name_id = session_index = name_id_format = name_id_nq = name_id_spnq = None
+    if 'samlNameId' in request.session:
+        name_id = request.session['samlNameId']
+    if 'samlSessionIndex' in request.session:
+        session_index = request.session['samlSessionIndex']
+    if 'samlNameIdFormat' in request.session:
+        name_id_format = request.session['samlNameIdFormat']
+    if 'samlNameIdNameQualifier' in request.session:
+        name_id_nq = request.session['samlNameIdNameQualifier']
+    if 'samlNameIdSPNameQualifier' in request.session:
+        name_id_spnq = request.session['samlNameIdSPNameQualifier']
+
+    auth.logout(request)
+    return HttpResponseRedirect(saml_auth.logout(name_id=name_id, session_index=session_index, nq=name_id_nq, name_id_format=name_id_format, spnq=name_id_spnq))
+
+
+def saml_sls(request):
+    req = prepare_django_request(request)
+    saml_auth = OneLogin_Saml2_Auth(req, old_settings=settings.ONELOGIN_SAML_SETTINGS)
+    request_id = None
+    if 'LogoutRequestID' in request.session:
+        request_id = request.session['LogoutRequestID']
+    url = saml_auth.process_slo(request_id=request_id, delete_session_cb=lambda: request.session.flush())
+    errors = saml_auth.get_errors()
+    if len(errors) == 0:
+        auth.logout(request)
+        if url is not None:
+            return HttpResponseRedirect(url)
+        else:
+            return HttpResponse("Logged out successfully")
+
+
 @csrf_exempt
 def saml_acs(request):
     req = prepare_django_request(request)
@@ -46,6 +81,12 @@ def saml_acs(request):
         if user is None:
             raise PermissionDenied()
         auth.login(request, user)
+        # This data is used during Single Log Out
+        request.session['samlNameId'] = saml_auth.get_nameid()
+        request.session['samlNameIdFormat'] = saml_auth.get_nameid_format()
+        request.session['samlNameIdNameQualifier'] = saml_auth.get_nameid_nq()
+        request.session['samlNameIdSPNameQualifier'] = saml_auth.get_nameid_spnq()
+        request.session['samlSessionIndex'] = saml_auth.get_session_index()
         if 'RelayState' in req['post_data'] and OneLogin_Saml2_Utils.get_self_url(req) != req['post_data']['RelayState']:
             return HttpResponseRedirect(saml_auth.redirect_to(req['post_data']['RelayState']))
         else:

@@ -9,6 +9,10 @@ SAML_SETTINGS = {
             "url": "http://192.168.99.100:8000/saml/acs/",
             "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
         },
+        "singleLogoutService": {
+            "url": "http://192.168.99.100:8000/saml/sls/",
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+        },
         "NameIDFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
         "x509cert": "",
         "privateKey": ""
