@@ -1,0 +1,9 @@
+[run]
+branch = true
+source = django_saml
+omit = */django_test/*
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    def __str__
