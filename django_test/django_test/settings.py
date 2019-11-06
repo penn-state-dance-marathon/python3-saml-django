@@ -143,7 +143,20 @@ SAML_SP = {
 
 SAML_BASE_DIRECTORY = BASE_DIR
 
-SAML_IDP_URL = 'http://192.168.99.100:8080/simplesaml/saml2/idp/metadata.php'
+# SAML_IDP_URL = 'http://192.168.99.100:8080/simplesaml/saml2/idp/metadata.php'
+
+SAML_IDP = {
+    "entityId": "https://app.onelogin.com/saml/metadata/<onelogin_connector_id>",
+    "singleSignOnService": {
+        "url": "https://app.onelogin.com/trust/saml2/http-post/sso/",
+        "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+    },
+    "singleLogoutService": {
+        "url": "https://app.onelogin.com/trust/saml2/http-redirect/slo/",
+        "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+    },
+    "x509cert": ""
+}
 
 SAML_SECURITY = {
     "nameIdEncrypted": False,
