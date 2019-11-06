@@ -61,4 +61,4 @@ class TestLogout(TestCase):
         self.assertEqual(parsed.netloc, 'app.onelogin.com')
         self.assertEqual(parsed.path, '/trust/saml2/http-redirect/slo/')
         query = parse_qs(parsed.query)
-        self.assertEqual(query['RelayState'][0], 'http://127.0.0.1/logged-out/')
+        self.assertEqual(query['RelayState'][0], '/logged-out')
