@@ -48,3 +48,17 @@ class TestLogin(TestCase):
         self.assertEqual(parsed.path, '/trust/saml2/http-post/sso/')
         query = parse_qs(parsed.query)
         self.assertEqual(query['RelayState'][0], 'http://127.0.0.1/test')
+
+
+class TestLogout(TestCase):
+    """Tests for the logout view."""
+
+    def test_logout(self):
+        """Test redirect to the IdP for logout."""
+        response = self.client.get(reverse('django_saml:logout'), HTTP_HOST='127.0.0.1')
+        self.assertEqual(response.status_code, 302)
+        parsed = urlparse(response['Location'])
+        self.assertEqual(parsed.netloc, 'app.onelogin.com')
+        self.assertEqual(parsed.path, '/trust/saml2/http-redirect/slo/')
+        query = parse_qs(parsed.query)
+        self.assertEqual(query['RelayState'][0], 'http://127.0.0.1/logged-out/')
