@@ -1,4 +1,5 @@
 from unittest.mock import patch
+from urllib.parse import urlparse, parse_qs
 
 from django.test import TestCase
 from django.urls import reverse
@@ -23,3 +24,27 @@ class TestMetadata(TestCase):
         response = self.client.get(reverse('django_saml:metadata'))
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.content.decode(), 'Test Error')
+
+
+class TestLogin(TestCase):
+    """Test for the login view."""
+
+    def test_login(self):
+        """Test redirect to IdP as expected."""
+        response = self.client.get(reverse('django_saml:login'), HTTP_HOST='127.0.0.1')
+        self.assertEqual(response.status_code, 302)
+        parsed = urlparse(response['Location'])
+        self.assertEqual(parsed.netloc, 'app.onelogin.com')
+        self.assertEqual(parsed.path, '/trust/saml2/http-post/sso/')
+        query = parse_qs(parsed.query)
+        self.assertEqual(query['RelayState'][0], 'http://127.0.0.1/')
+
+    def test_login_next(self):
+        """Test redirect to IdP as expected with next parameter."""
+        response = self.client.get(reverse('django_saml:login') + "?next=/test", HTTP_HOST='127.0.0.1')
+        self.assertEqual(response.status_code, 302)
+        parsed = urlparse(response['Location'])
+        self.assertEqual(parsed.netloc, 'app.onelogin.com')
+        self.assertEqual(parsed.path, '/trust/saml2/http-post/sso/')
+        query = parse_qs(parsed.query)
+        self.assertEqual(query['RelayState'][0], 'http://127.0.0.1/test')
