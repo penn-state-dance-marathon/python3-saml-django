@@ -109,6 +109,7 @@ def saml_acs(request):
             return HttpResponseRedirect(url)
         else:
             return HttpResponseRedirect(settings.SAML_LOGIN_REDIRECT)
+    logger.exception(saml_auth.get_last_error_reason())
     return HttpResponseServerError(content=', '.join(errors))
 
 

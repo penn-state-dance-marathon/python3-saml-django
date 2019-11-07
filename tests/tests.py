@@ -86,6 +86,7 @@ class TestSLS(TestCase):
     """Tests for the saml_sls view."""
 
     def setUp(self):
+        """Initialize common resources."""
         self.user = TestUser.objects.create(username='abc1234')
 
     def test_sls(self):
@@ -148,3 +149,18 @@ class TestSLS(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.content.decode(), 'Invalid request')
         logging.disable(logging.NOTSET)
+
+
+class TestACS(TestCase):
+    """Test saml_acs view."""
+
+    def test_acs(self):
+        xml = _file_contents(os.path.join(data_directory, 'login_response.xml'))
+        message = 'SAMLResponse=' + quote(base64.b64encode(xml.encode()))
+        response = self.client.post(reverse('django_saml:acs'), data=message, HTTP_HOST='127.0.0.1', content_type='application/x-www-form-urlencoded')
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['Location'], '/')
+        user = TestUser.objects.get()
+        self.assertEqual(user.username, 'test')
+        self.assertEqual(user.email, 'test@example.com')
+        self.assertEqual(int(self.client.session['_auth_user_id']), user.id)

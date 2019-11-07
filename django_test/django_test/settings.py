@@ -155,7 +155,7 @@ SAML_IDP = {
         "url": "https://app.onelogin.com/trust/saml2/http-redirect/slo/",
         "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
     },
-    "x509cert": ""
+    "x509cert": "MIICQDCCAamgAwIBAgIBADANBgkqhkiG9w0BAQsFADA9MQswCQYDVQQGEwJ1czELMAkGA1UECAwCUEExDTALBgNVBAoMBFRIT04xEjAQBgNVBAMMCXNhbWxfdGVzdDAeFw0xOTExMDUxNjQyMzRaFw0yOTExMDIxNjQyMzRaMD0xCzAJBgNVBAYTAnVzMQswCQYDVQQIDAJQQTENMAsGA1UECgwEVEhPTjESMBAGA1UEAwwJc2FtbF90ZXN0MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCsx6uh2kkp82rpuU5p7SAYwkgjpZ50Nii7SF7kxqNUhezfWwNOB8z0SMokF32DKeeLJ3GmZEcZbm5oWfLz6G/zfGKm6/z743cl1IESiDrP5m50+PNVwaxOH8a1GFYImY9ypsKVxB8R4EsTL8MCzTGT83xSGF/2x/LxCgdIYvfV6wIDAQABo1AwTjAdBgNVHQ4EFgQUhurZUlrAD9vtjO8pJeVzbd8JJWMwHwYDVR0jBBgwFoAUhurZUlrAD9vtjO8pJeVzbd8JJWMwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQsFAAOBgQCqRbcDMl+SJMG7u+Ys6zYcmmlFAx9cwUmo6zaR9qR9wzA4wTJ3l7BdjyoJe21v4ZyM4v8mem/voTk7A4XSCO4BTV+Se/Gf+ttb/0/ftY/Jf8ZKdBd3QTh4qppbyqCpcE5aKornNdiExZprfefqr1fTWuS4til21NC6LxUlrYwgQw=="
 }
 
 SAML_SECURITY = {
@@ -169,8 +169,8 @@ SAML_SECURITY = {
     "wantNameId": True,
     "wantNameIdEncrypted": False,
     "wantAssertionsEncrypted": False,
-    "signatureAlgorithm": "http://www.w3.org/2000/09/xmldsig#rsa-sha1",
-    "digestAlgorithm": "http://www.w3.org/2000/09/xmldsig#sha1"
+    "signatureAlgorithm": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+    "digestAlgorithm": "http://www.w3.org/2001/04/xmlenc#sha256"
 }
 
 SAML_CONTACT = {
