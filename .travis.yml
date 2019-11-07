@@ -13,6 +13,8 @@ env:
 python:
   - 3.5
   - 3.6
+  - 3.7
+  - 3.8
 
 before_install:
   - sudo apt-get install libxml2-dev libxmlsec1-dev libxmlsec1-openssl
