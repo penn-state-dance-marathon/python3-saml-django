@@ -8,8 +8,6 @@ UserModel = get_user_model()
 class SamlUserBackend(ModelBackend):
     """Backend for logging in users through SAML responses."""
 
-    create_unknown_user = settings.SAML_CREATE_USER
-
     def authenticate(self, request, session_data=None, **kwargs):
         """Handle logging in a user based on SAML data."""
         if session_data is None:
@@ -18,7 +16,7 @@ class SamlUserBackend(ModelBackend):
         username = session_data[settings.SAML_USERNAME_ATTR][0]
         username = self.clean_username(username)
 
-        if self.create_unknown_user:
+        if settings.SAML_CREATE_USER:
             user, created = UserModel._default_manager.get_or_create(**{
                 UserModel.USERNAME_FIELD: username
             })
