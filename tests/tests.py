@@ -5,9 +5,13 @@ import zlib
 from unittest.mock import patch
 from urllib.parse import urlparse, parse_qs, urlencode, quote
 
+from django.apps import apps
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase, override_settings, RequestFactory
 from django.urls import reverse
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
+from onelogin.saml2.idp_metadata_parser import OneLogin_Saml2_IdPMetadataParser
 from onelogin.saml2.settings import OneLogin_Saml2_Settings
 from onelogin.saml2.utils import OneLogin_Saml2_Utils
 
@@ -239,3 +243,81 @@ class TestBackend(TestCase):
         self.assertEqual(user.username, 'abc1234')
         self.assertEqual(user.email, 'test@example.com')
         self.assertEqual(user.first_name, 'Bob')
+
+
+class TestSettingsLoading(TestCase):
+    """Tests for the django_saml app configuration."""
+
+    def test_no_sp(self):
+        """Test loading without SP settings causes an exception."""
+        apps.clear_cache()
+        with self.settings(SAML_SP=None):
+            self.assertRaisesMessage(
+                ImproperlyConfigured, "SAML_SP must be defined", apps.get_app_config('django_saml').ready
+            )
+
+    def test_no_idp(self):
+        """Test loading without IdP settings causes an exception."""
+        apps.clear_cache()
+        with self.settings(SAML_IDP=None, SAML_IDP_URL=None, SAML_IDP_FILE=None):
+            self.assertRaisesMessage(
+                ImproperlyConfigured, "One must be defined: SAML_IDP, SAML_IDP_URL, SAML_IDP_FILE",
+                apps.get_app_config('django_saml').ready
+            )
+
+    @patch.object(OneLogin_Saml2_IdPMetadataParser, 'parse_remote')
+    def test_idp_url(self, mock):
+        """Test loading IdP metadata from URL."""
+        apps.clear_cache()
+        with self.settings(SAML_IDP=None, SAML_IDP_URL='https://example.com/saml/metadata'):
+            mock.return_value = {
+                "idp": {
+                    "entityId": "https://example.com/saml/metadata/",
+                    "singleSignOnService": {
+                        "url": "https://example.com/trust/saml2/http-post/sso/",
+                        "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+                    },
+                    "singleLogoutService": {
+                        "url": "https://example.com/trust/saml2/http-redirect/slo/",
+                        "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+                    },
+                    "x509cert": ""
+                }
+            }
+            apps.get_app_config('django_saml').ready()
+            mock.assert_called_once_with('https://example.com/saml/metadata')
+            self.assertEqual(settings.SAML_SETTINGS['idp']['entityId'], 'https://example.com/saml/metadata/')
+
+    def test_idp_file(self):
+        """Test loading IdP settings from a file."""
+        apps.clear_cache()
+        with self.settings(
+                SAML_IDP=None, SAML_IDP_URL=None, SAML_IDP_FILE=os.path.join(data_directory, 'metadata.xml')
+        ):
+            apps.get_app_config('django_saml').ready()
+            self.assertEqual(
+                settings.SAML_SETTINGS['idp']['entityId'],
+                'http://192.168.99.100:8080/simplesaml/saml2/idp/metadata.php'
+            )
+
+    def test_contact(self):
+        """Test SP contact information loading."""
+        apps.clear_cache()
+        with self.settings(SAML_CONTACT=None):
+            apps.get_app_config('django_saml').ready()
+            self.assertNotIn('contactPerson', settings.SAML_SETTINGS)
+        apps.clear_cache()
+        with self.settings(SAML_CONTACT={'technical': {'emailAddress': 'test@example.com', 'givenName': 'Bob'}}):
+            apps.get_app_config('django_saml').ready()
+            self.assertEqual(settings.SAML_SETTINGS['contactPerson']['technical']['givenName'], 'Bob')
+
+    def test_organization(self):
+        """Test SP organization information loading."""
+        apps.clear_cache()
+        with self.settings(SAML_ORGANIZATION=None):
+            apps.get_app_config('django_saml').ready()
+            self.assertNotIn('organization', settings.SAML_SETTINGS)
+        apps.clear_cache()
+        with self.settings(SAML_ORGANIZATION={'en-US': {'name': 'thon', 'displayname': 'THON', 'url': 'thon.org'}}):
+            apps.get_app_config('django_saml').ready()
+            self.assertEqual(settings.SAML_SETTINGS['organization']['en-US']['displayname'], 'THON')
