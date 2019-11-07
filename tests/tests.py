@@ -155,12 +155,60 @@ class TestACS(TestCase):
     """Test saml_acs view."""
 
     def test_acs(self):
+        """Test a standard login response."""
         xml = _file_contents(os.path.join(data_directory, 'login_response.xml'))
         message = 'SAMLResponse=' + quote(base64.b64encode(xml.encode()))
         response = self.client.post(reverse('django_saml:acs'), data=message, HTTP_HOST='127.0.0.1', content_type='application/x-www-form-urlencoded')
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['Location'], '/')
+        self.assertRedirects(response, '/')
         user = TestUser.objects.get()
         self.assertEqual(user.username, 'test')
         self.assertEqual(user.email, 'test@example.com')
         self.assertEqual(int(self.client.session['_auth_user_id']), user.id)
+
+    @override_settings(SAML_CREATE_USER=False)
+    def test_acs_no_user(self):
+        """Test instance where user doesn't exist."""
+        xml = _file_contents(os.path.join(data_directory, 'login_response.xml'))
+        message = 'SAMLResponse=' + quote(base64.b64encode(xml.encode()))
+        response = self.client.post(reverse('django_saml:acs'), data=message, HTTP_HOST='127.0.0.1',
+                                    content_type='application/x-www-form-urlencoded')
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(TestUser.objects.count(), 0)
+
+    def test_redirect(self):
+        xml = _file_contents(os.path.join(data_directory, 'login_response.xml'))
+        message = 'SAMLResponse={}&RelayState={}'.format(quote(base64.b64encode(xml.encode())), 'http://127.0.0.1/test')
+        response = self.client.post(reverse('django_saml:acs'), data=message, HTTP_HOST='127.0.0.1',
+                                    content_type='application/x-www-form-urlencoded')
+        self.assertRedirects(response, 'http://127.0.0.1/test', fetch_redirect_response=False)
+
+    def test_acs_get(self):
+        """Test invalid methods."""
+        response = self.client.get(reverse('django_saml:acs'))
+        self.assertEqual(response.status_code, 405)
+        response = self.client.put(reverse('django_saml:acs'))
+        self.assertEqual(response.status_code, 405)
+        response = self.client.patch(reverse('django_saml:acs'))
+        self.assertEqual(response.status_code, 405)
+
+    def test_exceptions(self):
+        """Test handling exceptions."""
+        logging.disable(logging.CRITICAL)
+        logging.disable(logging.ERROR)
+        message = 'SAMLResponse=asdasdasdasd'
+        response = self.client.post(reverse('django_saml:acs'), data=message, HTTP_HOST='127.0.0.1',
+                                    content_type='application/x-www-form-urlencoded')
+        self.assertEqual(response.status_code, 400)
+        logging.disable(logging.NOTSET)
+
+    def test_saml_errors(self):
+        """Test handling errors in SAML verification."""
+        logging.disable(logging.CRITICAL)
+        logging.disable(logging.ERROR)
+        xml = _file_contents(os.path.join(data_directory, 'login_response.xml'))
+        xml = xml.replace('X509Certificate>MIICQDCCAamgAwIBAgI', 'X509Certificate>MIICQDCCAamgAwZZZZ')
+        message = 'SAMLResponse={}&RelayState={}'.format(quote(base64.b64encode(xml.encode())), 'http://127.0.0.1/test')
+        response = self.client.post(reverse('django_saml:acs'), data=message, HTTP_HOST='127.0.0.1',
+                                    content_type='application/x-www-form-urlencoded')
+        self.assertEqual(response.status_code, 400)
+        logging.disable(logging.NOTSET)
