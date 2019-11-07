@@ -1,3 +1,5 @@
+SAML_CREATE_USER = True
+
 SAML_STRICT = True
 SAML_DEBUG = False
 

@@ -8,7 +8,7 @@ UserModel = get_user_model()
 class SamlUserBackend(ModelBackend):
     """Backend for logging in users through SAML responses."""
 
-    create_unknown_user = True
+    create_unknown_user = settings.SAML_CREATE_USER
 
     def authenticate(self, request, session_data=None, **kwargs):
         """Handle logging in a user based on SAML data."""
