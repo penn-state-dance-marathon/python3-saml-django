@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/penn-state-dance-marathon/python3-saml-django.svg?branch=master)](https://travis-ci.org/penn-state-dance-marathon/python3-saml-django)
 [![codecov](https://codecov.io/gh/penn-state-dance-marathon/python3-saml-django/branch/master/graph/badge.svg)](https://codecov.io/gh/penn-state-dance-marathon/python3-saml-django)
+[![PyPI version](https://badge.fury.io/py/python3-saml-django.svg)](https://badge.fury.io/py/python3-saml-django)
+![PyPI - Django Version](https://img.shields.io/pypi/djversions/python3-saml-django)
 # Django SAML Toolkit
 Quickly and easily add SAML Single Sign-On to your Django projects.
 This package is designed to be very simple for initial setup while also being easily customizable to meet all of your needs.
