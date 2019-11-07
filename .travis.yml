@@ -1,0 +1,14 @@
+dist: trusty
+sudo: required
+language: python
+cache: pip
+
+python:
+  - 3.5
+
+install: "pip install .[test]"
+
+script: coverage run django_test/manage.py tests
+
+after_success:
+  - codecov

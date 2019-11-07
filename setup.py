@@ -28,6 +28,7 @@ setuptools.setup(
             'flake8',
             'flake8-docstrings',
             'isort',
+            'codecov'
         ),
     },
 )
