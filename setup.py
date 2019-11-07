@@ -22,6 +22,7 @@ setuptools.setup(
     python_requires='>=3.6',
     extras_require={
         'test': (
+            'django>=1.11',
             'coverage',
             'pylint',
             'flake8',
