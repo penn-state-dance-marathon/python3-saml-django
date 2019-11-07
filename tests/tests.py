@@ -1,14 +1,13 @@
 import base64
 import logging
 import os
-import zlib
 from unittest.mock import patch
-from urllib.parse import urlparse, parse_qs, urlencode, quote
+from urllib.parse import parse_qs, quote, urlparse
 
 from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.test import TestCase, override_settings, RequestFactory
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from onelogin.saml2.idp_metadata_parser import OneLogin_Saml2_IdPMetadataParser
@@ -17,7 +16,6 @@ from onelogin.saml2.utils import OneLogin_Saml2_Utils
 
 from django_saml.backends import SamlUserBackend
 from sample.models import TestUser
-
 
 data_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_data')
 
@@ -163,7 +161,10 @@ class TestACS(TestCase):
         """Test a standard login response."""
         xml = _file_contents(os.path.join(data_directory, 'login_response.xml'))
         message = 'SAMLResponse=' + quote(base64.b64encode(xml.encode()))
-        response = self.client.post(reverse('django_saml:acs'), data=message, HTTP_HOST='127.0.0.1', content_type='application/x-www-form-urlencoded')
+        response = self.client.post(
+            reverse('django_saml:acs'), data=message, HTTP_HOST='127.0.0.1',
+            content_type='application/x-www-form-urlencoded'
+        )
         self.assertRedirects(response, '/')
         user = TestUser.objects.get()
         self.assertEqual(user.username, 'test')
@@ -181,6 +182,7 @@ class TestACS(TestCase):
         self.assertEqual(TestUser.objects.count(), 0)
 
     def test_redirect(self):
+        """Test view redirects properly with given RelayState."""
         xml = _file_contents(os.path.join(data_directory, 'login_response.xml'))
         message = 'SAMLResponse={}&RelayState={}'.format(quote(base64.b64encode(xml.encode())), 'http://127.0.0.1/test')
         response = self.client.post(reverse('django_saml:acs'), data=message, HTTP_HOST='127.0.0.1',

@@ -8,7 +8,6 @@ from django.views.decorators.csrf import csrf_exempt
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from onelogin.saml2.utils import OneLogin_Saml2_Utils
 
-
 logger = logging.getLogger('django_saml')
 
 
@@ -64,7 +63,7 @@ def saml_sls(request):
     saml_auth = OneLogin_Saml2_Auth(req, old_settings=settings.ONELOGIN_SAML_SETTINGS)
     request_id = request.session.get('LogoutRequestID', None)
     try:
-        url = saml_auth.process_slo(request_id=request_id, delete_session_cb=lambda: request.session.flush())
+        saml_auth.process_slo(request_id=request_id, delete_session_cb=lambda: request.session.flush())
         errors = saml_auth.get_errors()
         if len(errors) == 0:
             auth.logout(request)

@@ -2,16 +2,19 @@ import setuptools
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
+    # Start the description after the badges
+    start = long_description.find('#')
+    long_description = long_description[start:]
 
 setuptools.setup(
-    name="django-saml-thon",
+    name="python3-django-saml",
     version="0.0.1",
     author="THON Technology",
     author_email="technology@thon.org",
-    description="A Django wrapper for the python OneLogin SAML package.",
+    description="Implement SAML Single Sign-On in your Django project quickly and easily.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/penn-state-dance-marathon/django_saml",
+    url="https://github.com/penn-state-dance-marathon/python3-saml-django",
     packages=['django_saml'],
     install_requires=['python3-saml'],
     classifiers=[
