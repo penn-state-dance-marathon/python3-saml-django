@@ -20,12 +20,15 @@ class SamlUserBackend(ModelBackend):
             user, created = UserModel._default_manager.get_or_create(**{
                 UserModel.USERNAME_FIELD: username
             })
-            if created:
+            if created or settings.SAML_UPDATE_USER:
                 args = (session_data, user)
                 user = self.configure_user(*args)
         else:
             try:
                 user = UserModel._default_manager.get_by_natural_key(username)
+                if settings.SAML_UPDATE_USER:
+                    args = (session_data, user)
+                    user = self.configure_user(*args)
             except UserModel.DoesNotExist:
                 return None
         return user if self.user_can_authenticate(user) else None

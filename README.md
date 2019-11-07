@@ -109,15 +109,16 @@ SAML_IDP_URL = 'https://example.com/saml/metadata/'
 
 | Setting | Description | Default | Example |
 | ------- | ----------- | ------- | ------- |
-| SAML_STRICT | Incorrect SAML responses should be rejected.  **Should be True in production.** | True | False |
-| SAML_DEBUG | SAML warnings are displayed | False | True |
-| SAML_CREATE_USER | New users are created on login if they don't exist | True | False |
-| SAML_IDP_METADATA_TIMEOUT | If using SAML_IDP_URL, the result will be cached for this many seconds before checking again. | 3600 | 60 |
+| SAML_STRICT | Incorrect SAML responses should be rejected.  **Should be True in production.** | True |  
+| SAML_DEBUG | SAML warnings are displayed | False | 
+| SAML_CREATE_USER | New users are created on login if they don't exist | True | 
+| SAML_UPDATE_USER | Existing users are updated with information from SAML on login | False | 
+| SAML_IDP_METADATA_TIMEOUT | If using SAML_IDP_URL, the result will be cached for this many seconds before checking again. | 3600 | 
 | SAML_SECURITY | Advanced security settings | See below | See below |
 | SAML_CONTACT | Contact information for site maintainers | None | See below |
 | SAML_ORGANIZATION | Organization information | None | See below |
-| SAML_LOGIN_REDIRECT | URL to redirect users after a successful login | '/' | '/home' |
-| SAML_LOGOUT_REDIRECT | URL to redirect users after a successful logout | '/logged-out' | '/login' |
+| SAML_LOGIN_REDIRECT | URL to redirect users after a successful login | '/' | 
+| SAML_LOGOUT_REDIRECT | URL to redirect users after a successful logout | '/logged-out' |
 | SAML_NO_USER_REDIRECT | URL to redirect users if SAML_CREATE_USER = False and the user doesn't exist | None (Raises PermissionDenied) | '/permission-error' |
 | SAML_USERNAME_ATTR | SAML attribute to use to look up users | 'uid' | 'email' |
 | SAML_ATTR_MAP | List of 2-tuples to map SAML attributes to Django user attributes | [] | [('givenName', 'first_name')] |
