@@ -12,13 +12,14 @@ env:
 
 python:
   - 3.5
+  - 3.6
 
 before_install:
   - sudo apt-get install libxml2-dev libxmlsec1-dev libxmlsec1-openssl
 
 install:
   - pip install django~=$DJANGO_VERSION
-  - pip install .[test]
+  - pip install -e .[test]
 
 script: make
 
