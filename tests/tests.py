@@ -5,12 +5,13 @@ import zlib
 from unittest.mock import patch
 from urllib.parse import urlparse, parse_qs, urlencode, quote
 
-from django.test import TestCase, override_settings
+from django.test import TestCase, override_settings, RequestFactory
 from django.urls import reverse
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from onelogin.saml2.settings import OneLogin_Saml2_Settings
 from onelogin.saml2.utils import OneLogin_Saml2_Utils
 
+from django_saml.backends import SamlUserBackend
 from sample.models import TestUser
 
 
@@ -212,3 +213,29 @@ class TestACS(TestCase):
                                     content_type='application/x-www-form-urlencoded')
         self.assertEqual(response.status_code, 400)
         logging.disable(logging.NOTSET)
+
+
+class TestBackend(TestCase):
+    """Test SamlUserBackend."""
+
+    def setUp(self):
+        """Initialize common resources."""
+        self.backend = SamlUserBackend()
+        self.factory = RequestFactory()
+
+    def test_no_session(self):
+        """Test passing in username, password."""
+        request = self.factory.post('/saml/acs')
+        user = self.backend.authenticate(request, username='abc1234', password='password')
+        self.assertIsNone(user)
+
+    @override_settings(SAML_ATTR_MAP=[('givenName', 'first_name'), ('email', 'email')], SAML_USERNAME_ATTR='username')
+    def test_create_user(self):
+        """Test creating a new user."""
+        request = self.factory.post('/saml/acs')
+        user = self.backend.authenticate(
+            request, session_data={'email': ['test@example.com'], 'givenName': ['Bob'], 'username': ['abc1234']}
+        )
+        self.assertEqual(user.username, 'abc1234')
+        self.assertEqual(user.email, 'test@example.com')
+        self.assertEqual(user.first_name, 'Bob')
