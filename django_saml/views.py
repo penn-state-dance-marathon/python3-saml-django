@@ -50,7 +50,7 @@ def logout(request):
     auth.logout(request)
     url = saml_auth.logout(
         name_id=name_id, session_index=session_index, nq=name_id_nq, name_id_format=name_id_format, spnq=name_id_spnq,
-        return_to=settings.SAML_LOGOUT_REDIRECT
+        return_to=OneLogin_Saml2_Utils.get_self_url(req) + settings.SAML_LOGOUT_REDIRECT
     )
     request.session['LogoutRequestID'] = saml_auth.get_last_request_id()
     return HttpResponseRedirect(url)
@@ -58,6 +58,8 @@ def logout(request):
 
 def saml_sls(request):
     """Handle a LogoutResponse from the IdP."""
+    if request.method != 'GET':
+        return HttpResponse('Method not allowed.', status=405)
     req = prepare_django_request(request)
     saml_auth = OneLogin_Saml2_Auth(req, old_settings=settings.ONELOGIN_SAML_SETTINGS)
     request_id = request.session.get('LogoutRequestID', None)
@@ -66,23 +68,16 @@ def saml_sls(request):
         errors = saml_auth.get_errors()
         if len(errors) == 0:
             auth.logout(request)
-            if url is not None:
-                return HttpResponseRedirect(url)
-            else:
-                return HttpResponseRedirect(settings.SAML_LOGOUT_REDIRECT)
+            return HttpResponseRedirect(settings.SAML_LOGOUT_REDIRECT)
         else:
-            if settings.DEBUG:
-                return HttpResponseServerError(', '.join(errors))
-            else:
-                logger.exception(', '.join(errors))
-                return HttpResponse("Invalid response", status=400)
+            logger.exception(saml_auth.get_last_error_reason())
+            return HttpResponse("Invalid request", status=400)
     except UnicodeDecodeError:
         # Happens when someone messes with the response in the URL.  No need to log an exception.
-        return HttpResponse("Invalid request - Unable to decode response.", status=400)
+        return HttpResponse("Invalid request - Unable to decode response", status=400)
     except Exception as e:
-        if settings.DEBUG:
-            logger.exception(e)
-        return HttpResponse("Invalid request.", status=400)
+        logger.exception(e)
+        return HttpResponse("Invalid request", status=400)
 
 
 @csrf_exempt
