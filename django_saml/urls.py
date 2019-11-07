@@ -1,13 +1,13 @@
-from django.urls import path
+from django.conf.urls import url
 
 from django_saml import views
 
 app_name = 'django_saml'
 
 urlpatterns = [
-    path('metadata', views.metadata, name='metadata'),
-    path('acs', views.saml_acs, name='acs'),
-    path('login', views.login, name='login'),
-    path('logout', views.logout, name='logout'),
-    path('sls', views.saml_sls, name='sls'),
+    url(r'metadata$', views.metadata, name='metadata'),
+    url(r'acs$', views.saml_acs, name='acs'),
+    url(r'login$', views.login, name='login'),
+    url(r'logout$', views.logout, name='logout'),
+    url(r'sls$', views.saml_sls, name='sls'),
 ]

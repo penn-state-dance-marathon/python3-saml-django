@@ -1,11 +1,11 @@
 from django.contrib import admin
-from django.urls import include, path
+from django.conf.urls import url, include
 
 from sample import views
 
 urlpatterns = [
-    path('saml/', include('django_saml.urls')),
-    path('admin/', admin.site.urls),
-    path('', views.home),
-    path('logged-out/', views.logged_out),
+    url(r'^saml/', include('django_saml.urls')),
+    url(r'^admin/', admin.site.urls),
+    url('^$', views.home),
+    url(r'^logged-out/$', views.logged_out),
 ]

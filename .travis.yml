@@ -3,13 +3,22 @@ sudo: required
 language: python
 cache: pip
 
+env:
+  - DJANGO_VERSION=1.10.0
+  - DJANGO_VERSION=1.11.0
+  - DJANGO_VERSION=2.0.0
+  - DJANGO_VERSION=2.1.0
+  - DJANGO_VERSION=2.2.0
+
 python:
   - 3.5
 
 before_install:
   - sudo apt-get install libxml2-dev libxmlsec1-dev libxmlsec1-openssl
 
-install: "pip install .[test]"
+install:
+  - pip install django~=$DJANGO_VERSION
+  - pip install .[test]
 
 script: make
 

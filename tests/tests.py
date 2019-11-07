@@ -232,7 +232,7 @@ class TestBackend(TestCase):
     def test_no_session(self):
         """Test passing in username, password."""
         request = self.factory.post('/saml/acs')
-        user = self.backend.authenticate(request, username='abc1234', password='password')
+        user = self.backend.authenticate(request=request, username='abc1234', password='password')
         self.assertIsNone(user)
 
     @override_settings(SAML_ATTR_MAP=[('givenName', 'first_name'), ('email', 'email')], SAML_USERNAME_ATTR='username')
@@ -240,7 +240,7 @@ class TestBackend(TestCase):
         """Test creating a new user."""
         request = self.factory.post('/saml/acs')
         user = self.backend.authenticate(
-            request, session_data={'email': ['test@example.com'], 'givenName': ['Bob'], 'username': ['abc1234']}
+            request=request, session_data={'email': ['test@example.com'], 'givenName': ['Bob'], 'username': ['abc1234']}
         )
         self.assertEqual(user.username, 'abc1234')
         self.assertEqual(user.email, 'test@example.com')
