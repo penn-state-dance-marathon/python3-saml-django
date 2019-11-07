@@ -1,4 +1,4 @@
-dist: trusty
+dist: xenial
 sudo: required
 language: python
 cache: pip
@@ -7,7 +7,7 @@ python:
   - 3.5
 
 before_install:
-  - sudo apt-get install libxml2-dev libxmlsec1-dev libxmlsec1-openssl sqlite3
+  - sudo apt-get install libxml2-dev libxmlsec1-dev libxmlsec1-openssl
 
 install: "pip install .[test]"
 
