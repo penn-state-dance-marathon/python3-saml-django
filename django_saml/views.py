@@ -85,32 +85,38 @@ def saml_acs(request):
     """Handle an AuthenticationResponse from the IdP."""
     if request.method != 'POST':
         return HttpResponse('Method not allowed.', status=405)
-    req = prepare_django_request(request)
-    saml_auth = OneLogin_Saml2_Auth(req, old_settings=settings.ONELOGIN_SAML_SETTINGS)
-    request_id = request.session.get('AuthNRequestID', None)
-    saml_auth.process_response(request_id=request_id)
+    try:
+        req = prepare_django_request(request)
+        saml_auth = OneLogin_Saml2_Auth(req, old_settings=settings.ONELOGIN_SAML_SETTINGS)
+        request_id = request.session.get('AuthNRequestID', None)
+        saml_auth.process_response(request_id=request_id)
 
-    errors = saml_auth.get_errors()
+        errors = saml_auth.get_errors()
 
-    if not errors:
-        user = auth.authenticate(session_data=saml_auth.get_attributes())
-        if user is None:
-            raise PermissionDenied()
-        auth.login(request, user)
-        # This data is used during Single Log Out
-        request.session['samlNameId'] = saml_auth.get_nameid()
-        request.session['samlNameIdFormat'] = saml_auth.get_nameid_format()
-        request.session['samlNameIdNameQualifier'] = saml_auth.get_nameid_nq()
-        request.session['samlNameIdSPNameQualifier'] = saml_auth.get_nameid_spnq()
-        request.session['samlSessionIndex'] = saml_auth.get_session_index()
-        if 'RelayState' in req['post_data'] \
-                and OneLogin_Saml2_Utils.get_self_url(req) != req['post_data']['RelayState']:
-            url = saml_auth.redirect_to(req['post_data']['RelayState'])
-            return HttpResponseRedirect(url)
-        else:
-            return HttpResponseRedirect(settings.SAML_LOGIN_REDIRECT)
-    logger.exception(saml_auth.get_last_error_reason())
-    return HttpResponseServerError(content=', '.join(errors))
+        if not errors:
+            user = auth.authenticate(session_data=saml_auth.get_attributes())
+            if user is None:
+                raise PermissionDenied()
+            auth.login(request, user)
+            # This data is used during Single Log Out
+            request.session['samlNameId'] = saml_auth.get_nameid()
+            request.session['samlNameIdFormat'] = saml_auth.get_nameid_format()
+            request.session['samlNameIdNameQualifier'] = saml_auth.get_nameid_nq()
+            request.session['samlNameIdSPNameQualifier'] = saml_auth.get_nameid_spnq()
+            request.session['samlSessionIndex'] = saml_auth.get_session_index()
+            if 'RelayState' in req['post_data'] \
+                    and OneLogin_Saml2_Utils.get_self_url(req) != req['post_data']['RelayState']:
+                url = saml_auth.redirect_to(req['post_data']['RelayState'])
+                return HttpResponseRedirect(url)
+            else:
+                return HttpResponseRedirect(settings.SAML_LOGIN_REDIRECT)
+        logger.exception(saml_auth.get_last_error_reason())
+        return HttpResponse(content="Invalid Response", status=400)
+    except PermissionDenied:
+        raise
+    except Exception as e:
+        logger.exception(e)
+        return HttpResponse(content="Invalid Response", status=400)
 
 
 def metadata(request):
