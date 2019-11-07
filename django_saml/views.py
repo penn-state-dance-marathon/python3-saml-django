@@ -95,6 +95,8 @@ def saml_acs(request):
         if not errors:
             user = auth.authenticate(session_data=saml_auth.get_attributes())
             if user is None:
+                if settings.SAML_NO_USER_REDIRECT:
+                    return HttpResponseRedirect(settings.SAML_NO_USER_REDIRECT)
                 raise PermissionDenied()
             auth.login(request, user)
             # This data is used during Single Log Out

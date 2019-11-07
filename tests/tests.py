@@ -181,6 +181,15 @@ class TestACS(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertEqual(TestUser.objects.count(), 0)
 
+    @override_settings(SAML_CREATE_USER=False, SAML_NO_USER_REDIRECT='/permission-error')
+    def test_acs_no_user_redirect(self):
+        """Test instance where user doesn't exist and redirect is set."""
+        xml = _file_contents(os.path.join(data_directory, 'login_response.xml'))
+        message = 'SAMLResponse=' + quote(base64.b64encode(xml.encode()))
+        response = self.client.post(reverse('django_saml:acs'), data=message, HTTP_HOST='127.0.0.1',
+                                    content_type='application/x-www-form-urlencoded')
+        self.assertRedirects(response, '/permission-error', fetch_redirect_response=False)
+
     def test_redirect(self):
         """Test view redirects properly with given RelayState."""
         xml = _file_contents(os.path.join(data_directory, 'login_response.xml'))
