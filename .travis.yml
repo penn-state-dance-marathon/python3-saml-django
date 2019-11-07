@@ -11,7 +11,7 @@ before_install:
 
 install: "pip install .[test]"
 
-script: coverage run django_test/manage.py tests
+script: coverage run django_test/manage.py test tests
 
 after_success:
   - codecov
