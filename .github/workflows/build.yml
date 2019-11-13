@@ -1,0 +1,25 @@
+name: Test and Build
+
+on: [push]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        python: ['3.5', '3.6', '3.7', '3.8']
+        django: ['1.11.0', '2.0.0', '2.1.0', '3.2.0']
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python }}
+    - name: Install requirements
+      run: |
+        sudo apt-get install libxml2-dev libxmlsec1-dev libxmlsec1-openssl
+        pip install django~=${{ matrix.django }}
+        pip install -e .[test]
+    - name: Run tests
+      run: make
