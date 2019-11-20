@@ -81,7 +81,7 @@ SAML_SP = {
         # DO NOT CHANGE THIS
         "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
     },
-    "NameIDFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
+    "NameIDFormat": "urn:oasis:names:tc:SAML:2.0:nameid-format:unspecified",
     "x509cert": "<can also be loaded by file, see SAML_BASE_DIRECTORY>",
     "privateKey": "<can also be loaded by file, see SAML_BASE_DIRECTORY>"
 }
