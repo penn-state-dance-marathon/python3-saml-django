@@ -312,6 +312,30 @@ class TestSettingsLoading(TestCase):
             mock.assert_called_once_with('https://example.com/saml/metadata')
             self.assertEqual(settings.SAML_SETTINGS['idp']['entityId'], 'https://example.com/saml/metadata/')
 
+    @patch.object(OneLogin_Saml2_IdPMetadataParser, 'parse_remote')
+    def test_idp_url_cache(self, mock):
+        """Test caching IdP information results in no calls to the server."""
+        cache.set('SAML_IDP_INFO', {
+                "idp": {
+                    "entityId": "https://example.com/saml/metadata/",
+                    "singleSignOnService": {
+                        "url": "https://example.com/trust/saml2/http-post/sso/",
+                        "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+                    },
+                    "singleLogoutService": {
+                        "url": "https://example.com/trust/saml2/http-redirect/slo/",
+                        "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+                    },
+                    "x509cert": ""
+                }
+            }
+        )
+        apps.clear_cache()
+        with self.settings(SAML_IDP=None, SAML_IDP_URL='https://example.com/saml/metadata'):
+            apps.get_app_config('django_saml').ready()
+            mock.assert_not_called()
+            self.assertEqual(settings.SAML_SETTINGS['idp']['entityId'], 'https://example.com/saml/metadata/')    
+
     def test_idp_file(self):
         """Test loading IdP settings from a file."""
         apps.clear_cache()
