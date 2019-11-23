@@ -335,7 +335,7 @@ class TestSettingsLoading(TestCase):
         with self.settings(SAML_IDP=None, SAML_IDP_URL='https://example.com/saml/metadata'):
             apps.get_app_config('django_saml').ready()
             mock.assert_not_called()
-            self.assertEqual(settings.SAML_SETTINGS['idp']['entityId'], 'https://example.com/saml/metadata/')  
+            self.assertEqual(settings.SAML_SETTINGS['idp']['entityId'], 'https://example.com/saml/metadata/')
 
     def test_idp_file(self):
         """Test loading IdP settings from a file."""
