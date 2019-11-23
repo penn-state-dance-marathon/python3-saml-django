@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/penn-state-dance-marathon/python3-saml-django.svg?branch=master)](https://travis-ci.org/penn-state-dance-marathon/python3-saml-django)
+[![Build Status](https://github.com/penn-state-dance-marathon/python3-saml-django/workflows/Test%20and%20Build/badge.svg?branch=master)
 [![codecov](https://codecov.io/gh/penn-state-dance-marathon/python3-saml-django/branch/master/graph/badge.svg)](https://codecov.io/gh/penn-state-dance-marathon/python3-saml-django)
 [![PyPI version](https://badge.fury.io/py/python3-saml-django.svg)](https://badge.fury.io/py/python3-saml-django)
 ![PyPI - Django Version](https://img.shields.io/pypi/djversions/python3-saml-django)
