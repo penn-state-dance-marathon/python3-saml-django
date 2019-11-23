@@ -6,6 +6,7 @@ from urllib.parse import parse_qs, quote, urlparse
 
 from django.apps import apps
 from django.conf import settings
+from django.core.cache import cache
 from django.core.exceptions import ImproperlyConfigured
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
