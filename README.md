@@ -126,6 +126,7 @@ SAML_IDP_URL = 'https://example.com/saml/metadata/'
 | SAML_ATTR_MAP | List of 2-tuples to map SAML attributes to Django user attributes | [] | [('givenName', 'first_name')] |
 | SAML_BASE_DIRECTORY | File path to load SP certificates.  **Must contain a 'certs' folder with 'sp.key' and 'sp.crt' inside.** | None | `os.path.join(BASE_DIR, 'saml')` |
 | SAML_DESTINATION_HOST | Static value to compare with the SAML Destination attribute instead of reading from the request.  Useful for load balancers. | None | 'example.com'
+| SAML_DESTINATION_HTTPS | Companion for SAML_DESTINATION_HOST. Set to True if the destination will be over HTTPS but the final request will not be. | None | True
 
 **SAML_SECURITY** Default and Example
 ```python

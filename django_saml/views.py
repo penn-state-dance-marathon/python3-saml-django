@@ -24,6 +24,8 @@ def prepare_django_request(request):
     }
     if settings.SAML_DESTINATION_HOST is not None:
         result['http_host'] = settings.SAML_DESTINATION_HOST
+    if settings.SAML_DESTINATION_HTTPS is not None:
+        result['https'] = settings.SAML_DESTINATION_HTTPS
     return result
 
 
