@@ -21,6 +21,8 @@ def prepare_django_request(request):
         'get_data': request.GET.copy(),
         'post_data': request.POST.copy()
     }
+    if settings.SAML_DESTINATION_HOST is not None:
+        result['http_host'] = settings.SAML_DESTINATION_HOST
     return result
 
 
