@@ -230,6 +230,24 @@ class TestACS(TestCase):
         self.assertEqual(response.status_code, 400)
         logging.disable(logging.NOTSET)
 
+    def test_destination_validation(self):
+        """Test that the host header will be ignored for SAML validation if specified."""
+        logging.disable(logging.CRITICAL)
+        logging.disable(logging.ERROR)
+        xml = _file_contents(os.path.join(data_directory, 'login_response.xml'))
+        message = 'SAMLResponse={}&RelayState={}'.format(quote(base64.b64encode(xml.encode())), 'http://127.0.0.1/test')
+        response = self.client.post(reverse('django_saml:acs'), data=message, HTTP_HOST='example.com',
+                                    content_type='application/x-www-form-urlencoded')
+        self.assertEqual(response.status_code, 400)
+        apps.clear_cache()
+        # Even though the HTTP_HOST is example.com, the destination will be compared to the static setting
+        with self.settings(SAML_DESTINATION_HOST='127.0.0.1'):
+            apps.get_app_config('django_saml').ready()
+            response = self.client.post(reverse('django_saml:acs'), data=message, HTTP_HOST='example.com',
+                                        content_type='application/x-www-form-urlencoded')
+            self.assertRedirects(response, 'http://127.0.0.1/test', fetch_redirect_response=False)
+        logging.disable(logging.NOTSET)
+
 
 class TestBackend(TestCase):
     """Test SamlUserBackend."""
