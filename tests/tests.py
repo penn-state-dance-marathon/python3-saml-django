@@ -240,6 +240,7 @@ class TestACS(TestCase):
                                     content_type='application/x-www-form-urlencoded')
         self.assertEqual(response.status_code, 400)
         apps.clear_cache()
+        # Even though the HTTP_HOST is example.com, the destination will be compared to the static setting
         with self.settings(SAML_DESTINATION_HOST='127.0.0.1'):
             apps.get_app_config('django_saml').ready()
             response = self.client.post(reverse('django_saml:acs'), data=message, HTTP_HOST='example.com',
