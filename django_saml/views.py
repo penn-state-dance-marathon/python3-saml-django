@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib import auth
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
+from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from onelogin.saml2.utils import OneLogin_Saml2_Utils
@@ -24,6 +25,7 @@ def prepare_django_request(request):
     return result
 
 
+@never_cache
 def login(request):
     """Kick off a SAML login request."""
     req = prepare_django_request(request)
@@ -37,6 +39,7 @@ def login(request):
     return HttpResponseRedirect(url)
 
 
+@never_cache
 def logout(request):
     """Kick off a SAML logout request."""
     req = prepare_django_request(request)
@@ -55,6 +58,7 @@ def logout(request):
     return HttpResponseRedirect(url)
 
 
+@never_cache
 def saml_sls(request):
     """Handle a LogoutResponse from the IdP."""
     if request.method != 'GET':
@@ -79,6 +83,7 @@ def saml_sls(request):
         return HttpResponse("Invalid request", status=400)
 
 
+@never_cache
 @csrf_exempt
 def saml_acs(request):
     """Handle an AuthenticationResponse from the IdP."""
