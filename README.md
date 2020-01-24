@@ -119,9 +119,9 @@ SAML_IDP_URL = 'https://example.com/saml/metadata/'
 | SAML_SECURITY | Advanced security settings | See below | See below |
 | SAML_CONTACT | Contact information for site maintainers | None | See below |
 | SAML_ORGANIZATION | Organization information | None | See below |
-| SAML_LOGIN_REDIRECT | URL to redirect users after a successful login | '/' | 
-| SAML_LOGOUT_REDIRECT | URL to redirect users after a successful logout | '/logged-out' |
-| SAML_NO_USER_REDIRECT | URL to redirect users if SAML_CREATE_USER = False and the user doesn't exist | None (Raises PermissionDenied) | '/permission-error' |
+| SAML_LOGIN_REDIRECT | Path to redirect users after a successful login | '/' | 
+| SAML_LOGOUT_REDIRECT | Path to redirect users after a successful logout | '/logged-out' |
+| SAML_NO_USER_REDIRECT | Path to redirect users if SAML_CREATE_USER = False and the user doesn't exist | None (Raises PermissionDenied) | '/permission-error' |
 | SAML_USERNAME_ATTR | SAML attribute to use to look up users | 'uid' | 'email' |
 | SAML_ATTR_MAP | List of 2-tuples to map SAML attributes to Django user attributes | [] | [('givenName', 'first_name')] |
 | SAML_BASE_DIRECTORY | File path to load SP certificates.  **Must contain a 'certs' folder with 'sp.key' and 'sp.crt' inside.** | None | `os.path.join(BASE_DIR, 'saml')` |
