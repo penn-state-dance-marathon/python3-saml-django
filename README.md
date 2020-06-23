@@ -10,9 +10,15 @@ This package is designed to be very simple for initial setup while also being ea
 
 ### Dependencies (Linux)
 
-The package xmlsec1 is required for this to work.  On debian you can install it with the following:
+The package xmlsec1 is required for this to work.
+
+#### Debian / Ubuntu:
 
 `sudo apt-get install libxml2-dev libxmlsec1-dev libxmlsec1-openssl`
+
+#### Red Hat / CentOs:
+
+`sudo yum install libxml2-devel xmlsec1-devel xmlsec1-openssl-devel libtool-ltdl-devel`
 
 ### Dependencies (Windows)
 
