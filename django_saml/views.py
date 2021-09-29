@@ -74,11 +74,12 @@ def saml_sls(request):
     saml_auth = OneLogin_Saml2_Auth(req, old_settings=settings.ONELOGIN_SAML_SETTINGS)
     request_id = request.session.get('LogoutRequestID', None)
     try:
-        saml_auth.process_slo(request_id=request_id, delete_session_cb=lambda: request.session.flush())
+        url = saml_auth.process_slo(request_id=request_id, delete_session_cb=lambda: request.session.flush())
         errors = saml_auth.get_errors()
         if len(errors) == 0:
             auth.logout(request)
-            return HttpResponseRedirect(settings.SAML_LOGOUT_REDIRECT)
+            redirect_to = url or settings.SAML_LOGOUT_REDIRECT
+            return HttpResponseRedirect(redirect_to)
         else:
             logger.exception(saml_auth.get_last_error_reason())
             return HttpResponse("Invalid request", status=400)
