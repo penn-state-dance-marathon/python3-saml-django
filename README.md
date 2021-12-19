@@ -36,6 +36,8 @@ For more information [here is the related issue](https://github.com/onelogin/pyt
 
 ### Django
 
+Note: Django 1.11 support was dropped in `1.2.0`. If you need Django 1.11 support, please use version `1.1.4`.
+
 **settings.py**
 
 ```python
@@ -52,18 +54,9 @@ AUTHENTICATION_BACKENDS = [
 
 **urls.py**
 
-Django >= 2.0
 ```python
 urlpatterns = [
     path('saml/', include('django_saml.urls')),
-    ...
-]
-```
-
-Django <= 1.11
-```python
-urlpatterns = [
-    url(r'^saml/', include('django_saml.urls')),
     ...
 ]
 ```
