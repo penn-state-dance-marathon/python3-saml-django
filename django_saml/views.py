@@ -29,6 +29,10 @@ def prepare_django_request(request):
         result['server_port'] = '443' if result['https'] else '80'
     if settings.SAML_DESTINATION_PORT is not None:
         result['server_port'] = settings.SAML_DESTINATION_PORT
+    # Rewrite the server port as part of the http host
+    if result['server_port'] is not None:
+        result['http_host'] = f"{result['http_host']}:{result['server_port']}"
+        del result['server_port']
     return result
 
 
