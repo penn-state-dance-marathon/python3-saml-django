@@ -323,6 +323,7 @@ class TestBackend(TestCase):
         self.assertEqual(user.first_name, 'Bob')
         self.assertEqual(user.email, 'test@example.com')
 
+
 class TestSettingsLoading(TestCase):
     """Tests for the django_saml app configuration."""
 
