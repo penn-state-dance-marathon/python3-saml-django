@@ -22,13 +22,19 @@ class SamlUserBackend(ModelBackend):
             })
             if created or settings.SAML_UPDATE_USER:
                 args = (session_data, user)
-                user = self.configure_user(*args)
+                user = self.configure_user(
+                    *args,
+                    ignore_fields=None if created else settings.SAML_ATTR_UPDATE_IGNORE
+                )
         else:
             try:
                 user = UserModel._default_manager.get_by_natural_key(username)
                 if settings.SAML_UPDATE_USER:
                     args = (session_data, user)
-                    user = self.configure_user(*args)
+                    user = self.configure_user(
+                        *args,
+                        ignore_fields=settings.SAML_ATTR_UPDATE_IGNORE
+                    )
             except UserModel.DoesNotExist:
                 return None
         return user if self.user_can_authenticate(user) else None
@@ -40,13 +46,16 @@ class SamlUserBackend(ModelBackend):
         """
         return username
 
-    def configure_user(self, session_data, user):
+    def configure_user(self, session_data, user, ignore_fields=None):
         """Configure a user after creation and return the updated user.
 
         By default, apply SAML attribute mapping and set an unusable password for the user.
         """
+        if ignore_fields is None:
+            ignore_fields = []
         for saml_attr, django_attr in settings.SAML_ATTR_MAP:
-            setattr(user, django_attr, session_data[saml_attr][0])
+            if django_attr not in ignore_fields:
+                setattr(user, django_attr, session_data[saml_attr][0])
         user.set_unusable_password()
         user.save()
         return user

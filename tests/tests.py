@@ -287,6 +287,25 @@ class TestBackend(TestCase):
             user = self.backend.authenticate(request=request, session_data=session_data)
             self.assertEqual(user.first_name, 'Bob')
 
+    @override_settings(
+        SAML_ATTR_MAP=[('givenName', 'first_name'), ('email', 'email')],
+        SAML_USERNAME_ATTR='username',
+        SAML_ATTR_UPDATE_IGNORE=['first_name']
+    )
+    def test_update_user_with_ignore(self):
+        """Test updating a user with information from SAML."""
+        TestUser.objects.create(username='abc1234', first_name='Alex', email='old@example.com')
+        request = self.factory.post('/saml/acs')
+        session_data = {'email': ['test@example.com'], 'givenName': ['Bob'], 'username': ['abc1234']}
+        with self.settings(SAML_UPDATE_USER=False):
+            user = self.backend.authenticate(request=request, session_data=session_data)
+            self.assertEqual(user.first_name, 'Alex')
+            self.assertEqual(user.email, 'old@example.com')
+        with self.settings(SAML_UPDATE_USER=True):
+            user = self.backend.authenticate(request=request, session_data=session_data)
+            # Since we ignore the first_name attribute, it should only update the email
+            self.assertEqual(user.first_name, 'Alex')
+            self.assertEqual(user.email, 'test@example.com')
 
 class TestSettingsLoading(TestCase):
     """Tests for the django_saml app configuration."""
