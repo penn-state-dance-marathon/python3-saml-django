@@ -35,9 +35,12 @@ class DjangoSamlConfig(AppConfig):
             settings.SAML_SETTINGS['idp'] = settings.SAML_IDP
         elif settings.SAML_IDP_URL is not None:
             idp_data = cache.get('SAML_IDP_INFO', None)
-            if idp_data is None:
+            idp_url = cache.get('SAML_IDP_URL', None)
+            # If the IdP URL changes, we do not want to use the cached data
+            if idp_url != settings.SAML_IDP_URL or idp_data is None:
                 idp_data = OneLogin_Saml2_IdPMetadataParser.parse_remote(settings.SAML_IDP_URL)
                 cache.set('SAML_IDP_INFO', idp_data, settings.SAML_IDP_METADATA_TIMEOUT)
+                cache.set('SAML_IDP_URL', settings.SAML_IDP_URL, settings.SAML_IDP_METADATA_TIMEOUT)
             settings.SAML_SETTINGS['idp'] = idp_data['idp']
         elif settings.SAML_IDP_FILE is not None:
             f = open(settings.SAML_IDP_FILE, 'r')
