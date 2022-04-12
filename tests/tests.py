@@ -14,9 +14,9 @@ from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from onelogin.saml2.idp_metadata_parser import OneLogin_Saml2_IdPMetadataParser
 from onelogin.saml2.settings import OneLogin_Saml2_Settings
 from onelogin.saml2.utils import OneLogin_Saml2_Utils
+from sample.models import TestUser
 
 from django_saml.backends import SamlUserBackend
-from sample.models import TestUser
 
 data_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_data')
 
@@ -293,7 +293,7 @@ class TestBackend(TestCase):
         SAML_ATTR_UPDATE_IGNORE=['first_name']
     )
     def test_update_user_with_ignore(self):
-        """Test updating a user with information from SAML."""
+        """Test updating a user but ignoring some fields."""
         TestUser.objects.create(username='abc1234', first_name='Alex', email='old@example.com')
         request = self.factory.post('/saml/acs')
         session_data = {'email': ['test@example.com'], 'givenName': ['Bob'], 'username': ['abc1234']}
@@ -306,6 +306,22 @@ class TestBackend(TestCase):
             # Since we ignore the first_name attribute, it should only update the email
             self.assertEqual(user.first_name, 'Alex')
             self.assertEqual(user.email, 'test@example.com')
+
+    @override_settings(
+        SAML_CREATE_USER=True,
+        SAML_UPDATE_USER=False,
+        SAML_ATTR_MAP=[('givenName', 'first_name'), ('email', 'email')],
+        SAML_USERNAME_ATTR='username',
+        SAML_ATTR_UPDATE_IGNORE=['first_name']
+    )
+    def test_create_user_with_ignore(self):
+        """Test creating a user with ignore fields set."""
+        request = self.factory.post('/saml/acs')
+        session_data = {'email': ['test@example.com'], 'givenName': ['Bob'], 'username': ['abc1234']}
+        user = self.backend.authenticate(request=request, session_data=session_data)
+        # The first name field should still be set even though it is update ignored 
+        self.assertEqual(user.first_name, 'Bob')
+        self.assertEqual(user.email, 'test@example.com')
 
 class TestSettingsLoading(TestCase):
     """Tests for the django_saml app configuration."""
