@@ -10,6 +10,7 @@ from django.core.cache import cache
 from django.core.exceptions import ImproperlyConfigured
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
+from django_saml.exceptions import MissingAttributeException
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from onelogin.saml2.idp_metadata_parser import OneLogin_Saml2_IdPMetadataParser
 from onelogin.saml2.settings import OneLogin_Saml2_Settings
@@ -322,6 +323,34 @@ class TestBackend(TestCase):
         # The first name field should still be set even though it is update ignored 
         self.assertEqual(user.first_name, 'Bob')
         self.assertEqual(user.email, 'test@example.com')
+
+    @override_settings(
+        SAML_ATTR_MAP=[('givenName', 'first_name'), ('email', 'email')],
+        SAML_USERNAME_ATTR='username',
+        SAML_ATTR_DEFAULTS={'email': 'test@example.com'}
+    )
+    def test_defaults(self):
+        """Test creating a new user with a missing attribute."""
+        request = self.factory.post('/saml/acs')
+        user = self.backend.authenticate(
+            request=request, session_data={'givenName': ['Bob'], 'username': ['abc1234']}
+        )
+        self.assertEqual(user.username, 'abc1234')
+        self.assertEqual(user.email, 'test@example.com')
+        self.assertEqual(user.first_name, 'Bob')
+
+    @override_settings(
+        SAML_ATTR_MAP=[('givenName', 'first_name'), ('email', 'email')],
+        SAML_USERNAME_ATTR='username'
+    )
+    def test_missing_attribute_exception(self):
+        """Test creating a new user with a missing attribute throwing an exception."""
+        request = self.factory.post('/saml/acs')
+        with self.assertRaises(MissingAttributeException) as cm:
+            self.backend.authenticate(
+                request=request, session_data={'givenName': ['Bob'], 'username': ['abc1234']}
+            )
+        self.assertIn('email', str(cm.exception))
 
 
 class TestSettingsLoading(TestCase):

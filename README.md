@@ -123,6 +123,7 @@ SAML_IDP_URL = 'https://example.com/saml/metadata/'
 | SAML_NO_USER_REDIRECT | Path to redirect users if SAML_CREATE_USER = False and the user doesn't exist | None (Raises PermissionDenied) | '/permission-error' |
 | SAML_USERNAME_ATTR | SAML attribute to use to look up users | 'uid' | 'email' |
 | SAML_ATTR_MAP | List of 2-tuples to map SAML attributes to Django user attributes | [] | [('givenName', 'first_name')] |
+| SAML_ATTR_DEFAULTS | Dictionary of default values to use if an attribute is not present in the SAML response. If no default exists, then a `MissingAttributeException` will be thrown. | {} | {'first_name': ''} |
 | SAML_ATTR_UPDATE_IGNORE | List of Django user attributes to only set on first login, and ignore in future logins (only used if SAML_UPDATE_USER is `True`) | [] | [('email', 'first_name')] |
 | SAML_BASE_DIRECTORY | File path to load SP certificates.  **Must contain a 'certs' folder with 'sp.key' and 'sp.crt' inside.** | None | `os.path.join(BASE_DIR, 'saml')` |
 | SAML_DESTINATION_HOST | Static value to compare with the SAML Destination attribute instead of reading from the request.  Useful for load balancers. | None | 'example.com'

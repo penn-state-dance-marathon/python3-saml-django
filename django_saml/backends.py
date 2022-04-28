@@ -2,6 +2,8 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 
+from django_saml.exceptions import MissingAttributeException
+
 UserModel = get_user_model()
 
 
@@ -55,7 +57,13 @@ class SamlUserBackend(ModelBackend):
             ignore_fields = []
         for saml_attr, django_attr in settings.SAML_ATTR_MAP:
             if django_attr not in ignore_fields:
-                setattr(user, django_attr, session_data[saml_attr][0])
+                if saml_attr in session_data:
+                    setattr(user, django_attr, session_data[saml_attr][0])
+                elif django_attr in settings.SAML_ATTR_DEFAULTS:
+                    setattr(user, django_attr, settings.SAML_ATTR_DEFAULTS[django_attr])
+                else:
+                    raise MissingAttributeException(f'Missing SAML attribute in IdP response: {saml_attr} (mapping to {django_attr})')
+
         user.set_unusable_password()
         user.save()
         return user
