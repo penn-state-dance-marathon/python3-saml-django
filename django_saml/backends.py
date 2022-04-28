@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
+from django.db import transaction
 
 from django_saml.exceptions import MissingAttributeException
 
@@ -18,28 +19,32 @@ class SamlUserBackend(ModelBackend):
         username = session_data[settings.SAML_USERNAME_ATTR][0]
         username = self.clean_username(username)
 
-        if settings.SAML_CREATE_USER:
-            user, created = UserModel._default_manager.get_or_create(**{
-                UserModel.USERNAME_FIELD: username
-            })
-            if created or settings.SAML_UPDATE_USER:
-                args = (session_data, user)
-                user = self.configure_user(
-                    *args,
-                    ignore_fields=None if created else settings.SAML_ATTR_UPDATE_IGNORE
-                )
-        else:
-            try:
-                user = UserModel._default_manager.get_by_natural_key(username)
-                if settings.SAML_UPDATE_USER:
+        # We must create and configure the user in an atomic transaction because
+        #  otherwise, a failed reconfigure could cause unintended behavior with a
+        #  new user logging in for the second time. 
+        with transaction.atomic():
+            if settings.SAML_CREATE_USER:
+                user, created = UserModel._default_manager.get_or_create(**{
+                    UserModel.USERNAME_FIELD: username
+                })
+                if created or settings.SAML_UPDATE_USER:
                     args = (session_data, user)
                     user = self.configure_user(
                         *args,
-                        ignore_fields=settings.SAML_ATTR_UPDATE_IGNORE
+                        ignore_fields=None if created else settings.SAML_ATTR_UPDATE_IGNORE
                     )
-            except UserModel.DoesNotExist:
-                return None
-        return user if self.user_can_authenticate(user) else None
+            else:
+                try:
+                    user = UserModel._default_manager.get_by_natural_key(username)
+                    if settings.SAML_UPDATE_USER:
+                        args = (session_data, user)
+                        user = self.configure_user(
+                            *args,
+                            ignore_fields=settings.SAML_ATTR_UPDATE_IGNORE
+                        )
+                except UserModel.DoesNotExist:
+                    return None
+            return user if self.user_can_authenticate(user) else None
 
     def clean_username(self, username):
         """Perform any cleaning on the "username" prior to using it to get or create the user object.
