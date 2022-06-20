@@ -200,6 +200,14 @@ class TestACS(TestCase):
                                     content_type='application/x-www-form-urlencoded')
         self.assertRedirects(response, 'http://127.0.0.1/test', fetch_redirect_response=False)
 
+    def test_redirect_empty_relay_state(self):
+        """Test view redirects properly and ignores empty RelayState."""
+        xml = _file_contents(os.path.join(data_directory, 'login_response.xml'))
+        message = 'SAMLResponse={}&RelayState={}'.format(quote(base64.b64encode(xml.encode())), '')
+        response = self.client.post(reverse('django_saml:acs'), data=message, HTTP_HOST='127.0.0.1',
+                                    content_type='application/x-www-form-urlencoded')
+        self.assertRedirects(response, '/', fetch_redirect_response=False)
+
     def test_acs_get(self):
         """Test invalid methods."""
         response = self.client.get(reverse('django_saml:acs'))
@@ -320,7 +328,7 @@ class TestBackend(TestCase):
         request = self.factory.post('/saml/acs')
         session_data = {'email': ['test@example.com'], 'givenName': ['Bob'], 'username': ['abc1234']}
         user = self.backend.authenticate(request=request, session_data=session_data)
-        # The first name field should still be set even though it is update ignored 
+        # The first name field should still be set even though it is update ignored
         self.assertEqual(user.first_name, 'Bob')
         self.assertEqual(user.email, 'test@example.com')
 
