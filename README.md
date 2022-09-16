@@ -201,7 +201,7 @@ class CustomSamlBackend(SamlUserBackend):
         for group_name in session_data['psMemberOf']:
             group_name = group_name[5:]
             g = Group.objects.get(name=group_name)
-            g.members.add(user)
+            g.user_set.add(user)
         return user
 ``` 
 
