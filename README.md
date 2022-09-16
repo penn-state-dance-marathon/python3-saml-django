@@ -178,6 +178,7 @@ For situations like advanced attribute mapping with groups, transforming SAML at
 
 Example:
 ```python
+from django.contrib.auth.models import Group
 from django_saml.backends import SamlUserBackend
 
 
