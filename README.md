@@ -178,6 +178,7 @@ For situations like advanced attribute mapping with groups, transforming SAML at
 
 Example:
 ```python
+from django.contrib.auth.models import Group
 from django_saml.backends import SamlUserBackend
 
 
@@ -190,17 +191,17 @@ class CustomSamlBackend(SamlUserBackend):
         """
         return username.split('@')[0]
 
-    def configure_user(self, session_data, user):
+    def configure_user(self, session_data, user, ignore_fields=None):
         """Custom attribute mapping with groups.
         
         NOTE: ALL SAML attributes in session_data are arrays, even if there is only one element.        
         """
         # Call super() to take care of the simple attribute mapping in SAML_ATTR_MAP
-        user = super(CustomSamlBackend, self).configure_user(session_data, user)
+        user = super(CustomSamlBackend, self).configure_user(session_data, user, ignore_fields=ignore_fields)
         for group_name in session_data['psMemberOf']:
             group_name = group_name[5:]
             g = Group.objects.get(name=group_name)
-            g.members.add(user)
+            g.user_set.add(user)
         return user
 ``` 
 
