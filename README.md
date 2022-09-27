@@ -121,8 +121,8 @@ SAML_IDP_URL = 'https://example.com/saml/metadata/'
 | SAML_LOGIN_REDIRECT | Path to redirect users after a successful login | '/' | 
 | SAML_LOGOUT_REDIRECT | Path to redirect users after a successful logout | '/logged-out' |
 | SAML_NO_USER_REDIRECT | Path to redirect users if SAML_CREATE_USER = False and the user doesn't exist | None (Raises PermissionDenied) | '/permission-error' |
-| SAML_USERNAME_ATTR | SAML attribute to use to look up users | 'uid' | 'email' |
-| SAML_ATTR_MAP | List of 2-tuples to map SAML attributes to Django user attributes | [] | [('givenName', 'first_name')] |
+| SAML_USERNAME_ATTR | SAML attribute to use to look up users (name, not friendly name) | 'uid' | 'email' |
+| SAML_ATTR_MAP | List of 2-tuples to map SAML attributes to Django user attributes (indexed by name, not friendly name)  | [] | [('givenName', 'first_name')] |
 | SAML_ATTR_DEFAULTS | Dictionary of default values to use if an attribute is not present in the SAML response. If no default exists, then a `MissingAttributeException` will be thrown. | {} | {'first_name': ''} |
 | SAML_ATTR_UPDATE_IGNORE | List of Django user attributes to only set on first login, and ignore in future logins (only used if SAML_UPDATE_USER is `True`) | [] | [('email', 'first_name')] |
 | SAML_BASE_DIRECTORY | File path to load SP certificates.  **Must contain a 'certs' folder with 'sp.key' and 'sp.crt' inside.** | None | `os.path.join(BASE_DIR, 'saml')` |
@@ -172,6 +172,10 @@ SAML_ORGANIZATION = {
     }
 }
 ```
+
+### A Note About Attributes
+All SAML attributes must have a name, but sometimes they may have a `FriendlyName`. All of the configuration settings in this library rely on the normal name, not friendly name. Please reference your IdP's attribute settings or analyze a SAML response to see the attributes available.  
+Some IdPs use obscure names like `urn:oid:2.5.4.42` while others use `firstName`; just because the docs use a friendly-looking name does not mean it is the `FriendlyName`.
 
 ### Advanced Configuration (Custom Backend)
 For situations like advanced attribute mapping with groups, transforming SAML attributes, etc, you can create custom backends to use instead of the default.
