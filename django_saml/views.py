@@ -119,7 +119,7 @@ def saml_acs(request):
             request.session['samlNameIdSPNameQualifier'] = saml_auth.get_nameid_spnq()
             request.session['samlSessionIndex'] = saml_auth.get_session_index()
             relay_state = req['post_data'].get('RelayState')
-            if relay_state \
+            if relay_state is not None and len(relay_state) > 0\
                     and OneLogin_Saml2_Utils.get_self_url(req) != relay_state:
                 url = saml_auth.redirect_to(relay_state)
                 return HttpResponseRedirect(url)
