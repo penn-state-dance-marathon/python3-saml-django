@@ -36,7 +36,7 @@ For more information [here is the related issue](https://github.com/onelogin/pyt
 
 ### Django
 
-Note: Django 1.11 support was dropped in `1.2.0`. If you need Django 1.11 support, please use version `1.1.4`.
+Note: Django 1.11 support was dropped in `1.2.0`. If you need Django 1.11 support, please use version `1.1.4`. Django 2.x support was dropped in `1.3.0`. If you need Django 2.x support, please use version `1.2.2`.
 
 **settings.py**
 
